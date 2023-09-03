@@ -1,0 +1,23 @@
+[tool.poetry]
+name = "notification-bot-backend"
+version = "0.1.0"
+description = ""
+authors = ["messiah1349 <messiah1349@gmail.com>"]
+readme = "README.md"
+packages = [{include = "notification_bot_backend"}]
+
+[tool.poetry.dependencies]
+python = "^3.10"
+fastapi = "^0.103.0"
+uvicorn = "^0.23.2"
+sqlalchemy-utils = "0.38.3"
+pyyaml = "^6.0.1"
+pytz = "^2023.3"
+psycopg2 = "^2.9.7"
+sqlalchemy = {extras = ["asyncio"], version = "^2.0.20"}
+asyncpg = "^0.28.0"
+
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
