@@ -17,5 +17,7 @@ class InputDeed(BaseModel):
 
 
 class AddNotification(BaseModel):
-    deed_id: int
     notification_time: datetime
+
+class RenameDeed(BaseModel):
+    new_deed_name: str
