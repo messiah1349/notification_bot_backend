@@ -2,8 +2,8 @@ from contextlib import asynccontextmanager
 from fastapi import Depends, FastAPI
 
 import routers
-from lib.db.deed import create_data_base_and_tables
-from lib.builder import engine
+from app.db.deed import create_data_base_and_tables
+from app.builder import engine
 
 
 @asynccontextmanager

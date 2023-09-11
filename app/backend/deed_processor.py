@@ -3,24 +3,13 @@ from sqlalchemy import update
 from sqlalchemy.future import select
 from sqlalchemy.orm import scoped_session, Session, query, decl_api
 from sqlalchemy.ext.asyncio import async_sessionmaker
-from sqlalchemy.orm import sessionmaker
-from dataclasses import dataclass
-from typing import Any
 from datetime import datetime
 import logging
 
-from lib.db.deed import Deed
-from configs.definitions import ROOT_DIR
+from app.db.deed import Deed
+from app.backend.response import Response
 
-alch_query = query.Query
 logger = logging.getLogger(__name__)
-
-
-@dataclass
-class Response:
-    """every backend method should return response object"""
-    status: int  # 0 status - everything is good, else - there is error
-    answer: Any  # result
 
 
 def db_executor(func):
@@ -99,7 +88,7 @@ class DeedProcessor(TableProcessor):
         super().__init__(engine)
         self.table_model = Deed
 
-    async def insert_deed(self, deed_name: str, telegram_id: int) -> int:
+    async def add_deed(self, deed_name: str, telegram_id: int) -> int:
 
         try:
             current_id = await self.get_max_id() + 1
@@ -135,6 +124,7 @@ class DeedProcessor(TableProcessor):
         return await self._get_max_value_of_column(self.table_model, 'id')
 
     async def add_notification(self, deed_id: int, notification_time: datetime) -> Response(int, str):
+        # TO DO: return deed object in response
         filter_values = {
             'id': deed_id
         }
@@ -164,7 +154,7 @@ class DeedProcessor(TableProcessor):
             logger.error(f"{deed_id=} was NOT marked as done, exception - {e}")
             return Response(1, e)
 
-    async def get_deeds_for_user(self, telegram_id: int) -> Response(int, list[Deed]):
+    async def get_deed_for_user(self, telegram_id: int) -> Response(int, list[Deed]):
         filter_values = {
             'telegram_id': telegram_id,
             'done_flag': False
@@ -177,7 +167,7 @@ class DeedProcessor(TableProcessor):
             return Response(1, e) 
         return Response(0, deeds)
 
-    async def get_deed_by_id(self, deed_id: int) -> Response(int, Deed):
+    async def get_deed(self, deed_id: int) -> Response(int, Deed):
         filter_values = {
             'id': deed_id
         }
@@ -195,7 +185,7 @@ class DeedProcessor(TableProcessor):
         except Exception as e:
             return Response(1, e)
 
-    async def rename_deed_name(self, deed_id: int, new_deed_name: str):
+    async def rename_deed(self, deed_id: int, new_deed_name: str):
         filter_values = {
             'id': deed_id
         }
@@ -209,31 +199,3 @@ class DeedProcessor(TableProcessor):
         except Exception as e:
             logger.error(f"{deed_id=} was NOT renamed to {new_deed_name}, exception - {e}")
             return Response(1, e)
-
-
-class Backend:
-
-    def __init__(self, engine):
-        self.deed_processor = DeedProcessor(engine)
-
-    def health_check(self):
-        return 'backend OK'
-
-    async def add_deed(self, deed_name: str, telegram_id: int) -> Response:
-        resp = await self.deed_processor.insert_deed(deed_name, telegram_id)
-        return resp
-
-    async def add_notification(self, deed_id: int, notification_time: datetime) -> Response:
-        return await self.deed_processor.add_notification(deed_id, notification_time)
-
-    async def mark_deed_as_done(self, deed_id: int) -> Response:
-        return await self.deed_processor.mark_deed_as_done(deed_id)
-
-    async def rename_deed(self, deed_id: int, new_deed_name: str) -> Response:
-        return await self.deed_processor.rename_deed_name(deed_id, new_deed_name)
-
-    async def get_deed_for_user(self, telegram_id: int) -> Response:
-        return await self.deed_processor.get_deeds_for_user(telegram_id)
-
-    async def get_deed(self, deed_id) -> Response:
-        return await self.deed_processor.get_deed_by_id(deed_id)

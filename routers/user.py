@@ -3,7 +3,7 @@ from typing import List
 from fastapi import APIRouter, HTTPException
 from fastapi.responses import JSONResponse
 from fastapi.encoders import jsonable_encoder
-from lib import backend_controller 
+from app import backend_controller 
 from api import models
 
 user_router = APIRouter(prefix='/user')

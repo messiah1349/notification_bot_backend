@@ -6,7 +6,7 @@ from sqlalchemy.ext.asyncio import create_async_engine
 import logging
 
 # from configs.definitions import ROOT_DIR
-import lib.utils as ut
+import app.utils as ut
 
 logger = logging.getLogger(__name__)
 
