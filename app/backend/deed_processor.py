@@ -42,6 +42,7 @@ class TableProcessor:
 
     def __init__(self, engine):
         self.engine = engine
+        self.async_sessionmaker = async_sessionmaker(engine)    
 
     @db_selector
     async def get_query_result(self, query: query.Query, session=None) -> list["table_model"]:
@@ -88,24 +89,40 @@ class DeedProcessor(TableProcessor):
         super().__init__(engine)
         self.table_model = Deed
 
-    async def add_deed(self, deed_name: str, telegram_id: int) -> int:
+    async def add_deed(self, deed_name: str, telegram_id: int) -> Response:
 
-        try:
-            current_id = await self.get_max_id() + 1
-            data = {
-                'id': current_id,
-                'telegram_id': telegram_id,
-                'name': deed_name,
-                'create_time': datetime.now(),
-                'notify_time': None,
-                'done_flag': False,
-            }
-            await self._insert_values(self.table_model, data)
-            logger.info(f"deed '{deed_name}' was inserted to DB")
-            return Response(0, current_id)
-        except Exception as e:
-            logger.error(f"deed '{deed_name}' was not inserted to DB, exception - {e}")
-            return Response(1, e)
+    #    try:
+    #        current_id = await self.get_max_id() + 1
+    #        data = {
+    #            'id': current_id,
+    #            'telegram_id': telegram_id,
+    #            'name': deed_name,
+    #            'create_time': datetime.now(),
+    #            'notify_time': None,
+    #            'done_flag': False,
+    #        }
+    #        await self._insert_values(self.table_model, data)
+    #        logger.info(f"deed '{deed_name}' was inserted to DB")
+    #        return Response(0, current_id)
+    #    except Exception as e:
+    #        logger.error(f"deed '{deed_name}' was not inserted to DB, exception - {e}")
+    #        return Response(1, e)
+        data = {
+            'telegram_id': telegram_id,
+            'name': deed_name,
+            'create_time': datetime.now(),
+            'notify_time': None,
+            'done_flag': False, 
+        }
+        
+        deed = Deed(**data)
+
+        async with self.async_sessionmaker() as session:
+            session.add(deed)
+            await session.commit()
+            await session.refresh(deed)
+
+        return Response(201, deed)
 
     async def get_all_active_deeds(self) -> list[Deed]:
         filter_values = {
@@ -123,21 +140,20 @@ class DeedProcessor(TableProcessor):
     async def get_max_id(self):
         return await self._get_max_value_of_column(self.table_model, 'id')
 
-    async def add_notification(self, deed_id: int, notification_time: datetime) -> Response(int, str):
+    async def add_notification(self, deed_id: int, notification_time: datetime) -> Response(int, Deed|str):
         # TO DO: return deed object in response
-        filter_values = {
-            'id': deed_id
-        }
-        change_values = {
-            'notify_time': notification_time
-        }
+
         try:
-            await self._change_column_value(self.table_model, filter_values, change_values)
-            logger.info(f"notification for {deed_id=} was set to {notification_time}")
-            return Response(0, 'OK')
+            async with self.async_sessionmaker() as session:
+                deed = await session.get(Deed, deed_id) 
+                deed.notify_time = notification_time
+                await session.commit()
+                await session.refresh(deed)
+                logger.info(f"notification for {deed_id=} was set to {notification_time}")
+                return Response(0, deed)
         except Exception as e:
             logger.error(f"notification for {deed_id=} was NOT set to {notification_time}, exception - {e}")
-            return Response(1, e)
+            return Response(1, str(e))
 
     async def mark_deed_as_done(self, deed_id: int) -> Response(int, str):
         filter_values = {

@@ -21,6 +21,7 @@ class Requester:
         async with aiohttp.ClientSession() as session:
             async with session.delete(url=url) as response:
                 status = response.status
+                print(status)
                 text = await response.text()
         return Response(status, text)
 
@@ -44,6 +45,7 @@ class Requester:
         self,
         deed_id
     ) -> Response:
-        url = self.sender_url + f"/notification/{deed_id}"
-        response = await self._delete(url, None)
+        print('hi!')
+        url = self.sender_url + f"/notifications/{deed_id}/"
+        response = await self._delete(url)
         return response

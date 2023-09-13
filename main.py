@@ -2,13 +2,12 @@ from contextlib import asynccontextmanager
 from fastapi import Depends, FastAPI
 
 import routers
-from app.db.deed import create_data_base_and_tables
+from app.db.deed import create_tables
 from app.builder import engine
-
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    create_data_base_and_tables(engine)
+    await create_tables(engine)
     yield 
     pass
 
