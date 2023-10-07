@@ -13,7 +13,7 @@ logger = logging.getLogger(__name__)
 
 Base = declarative_base()
 
-DATABASE_NAME = 'notification_bot'
+DATABASE_NAME = 'postgres'
 
 
 class Deed(Base):
@@ -27,8 +27,7 @@ class Deed(Base):
     done_flag = Column(Boolean)
 
 
-
-def get_engine(postgres_password: str, postgres_port:str, postgres_host:str) -> AsyncEngine:
+def get_engine(postgres_password: str, postgres_port: str, postgres_host: str) -> AsyncEngine:
     url = f'postgresql+asyncpg://postgres:{postgres_password}@{postgres_host}:{postgres_port}/{DATABASE_NAME}'
     postgres_engine = create_async_engine(url)
     logger.info('engine was passed')
@@ -48,4 +47,3 @@ async def create_tables(engine):
         logger.error(f"Couldn't create meta data; exception - \n{e}")
     finally:
         return
-
