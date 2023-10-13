@@ -1,5 +1,5 @@
 from contextlib import asynccontextmanager
-from fastapi import Depends, FastAPI
+from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 import routers
@@ -12,9 +12,12 @@ origins = [
     "http://localhost:8080",
     "http://localhost:8010",
     "http://localhost:5174",
+    "http://localhost:5173",
     "http://front"
     "http://127.0.0.1:5500",
-    "http://127.0.0.1"
+    "http://127.0.0.1",
+    "http://194.37.82.51/",
+    "http://194.37.82.51/:80"
 ]
 
 

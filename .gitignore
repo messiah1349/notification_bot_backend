@@ -1,5 +1,6 @@
 # custom
 *.db
+*.env
 std*
 .idea/
 .DS_Store
