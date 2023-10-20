@@ -1,6 +1,7 @@
 from app.backend.deed_processor import DeedProcessor
 from app.backend.requester import Requester
 
+
 class Backend(DeedProcessor, Requester):
 
     def __init__(self, engine):

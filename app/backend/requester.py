@@ -1,5 +1,4 @@
 from datetime import datetime
-import json
 import aiohttp
 
 from app.common.constants import TELEGRAM_SENDER_HOST, TELEGRAM_SENDER_PORT
@@ -8,8 +7,9 @@ from app.backend.response import Response
 
 class Requester:
     def __init__(self):
-        self.sender_url = f"http://{TELEGRAM_SENDER_HOST}:{TELEGRAM_SENDER_PORT}"
-        
+        self.sender_url = \
+            f"http://{TELEGRAM_SENDER_HOST}:{TELEGRAM_SENDER_PORT}"
+
     async def _post(self, url: str, data: dict) -> Response:
         async with aiohttp.ClientSession() as session:
             async with session.post(url, json=data) as response:
@@ -26,8 +26,8 @@ class Requester:
         return Response(status, text)
 
     async def send_notification_post(
-        self, 
-        deed_id: int, 
+        self,
+        deed_id: int,
         telegram_id: int,
         deed_name: str,
         deed_time: datetime
